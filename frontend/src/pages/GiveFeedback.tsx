@@ -23,9 +23,9 @@ const GiveFeedback: React.FC = () => {
       try {
         let response;
         if (feedbackType === 'member') {
-          response = await fetch('http://localhost:8080/members');
+          response = await fetch('http://localhost:8080/members/');
         } else { // feedbackType === 'team'
-          response = await fetch('http://localhost:8080/teams');
+          response = await fetch('http://localhost:8080/teams/');
         }
 
         if (!response.ok) {
