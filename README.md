@@ -18,6 +18,8 @@ Jules working <br/>
 
 ## Developmement
 
+This POC was developed using google Jules(https://jules.google/), AI Engineering agent that can help you to develop software.
+
 PROS
 
 * Right now (16.JUN.2025) Jules is FREE.
@@ -29,6 +31,7 @@ CONS
 * Jules does not open PRs (you need open in github)
 * Jules does not fully respect agents.md (because I asked for no comments)
 * Jules is a bit slow compared with OpenAI Codex
+* Jules got stuck more often compared with OpenAI Codex
 * Right now (16.JUN.2025) there is a limit of 60 tasks a day.
 
 You can see all PRs here: https://github.com/diegopacheco/google-jules-poc/pulls?q=is%3Apr+is%3Aclosed
