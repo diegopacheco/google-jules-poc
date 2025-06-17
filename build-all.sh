@@ -12,13 +12,10 @@ echo "Backend build complete. Executable: app_backend"
 echo ""
 echo "Building frontend..."
 cd frontend
-# Check if node_modules directory exists, if not, run npm install
-if [ ! -d "node_modules" ]; then
-  echo "Node modules not found, running npm install..."
-  npm install
-else
-  echo "Node modules found, skipping npm install."
-fi
+echo "Removing existing frontend/node_modules directory..."
+rm -rf node_modules
+echo "Node modules not found, running npm install..."
+npm install
 npm run build
 cd ..
 echo "Frontend build complete. Static files should be in frontend/build or frontend/dist"
