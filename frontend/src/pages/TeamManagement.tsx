@@ -30,7 +30,7 @@ const TeamManagement: React.FC = () => {
     setActionError(null);
     setActionMessage(null);
     try {
-      const response = await fetch('http://localhost:8080/teams'); // Assuming GET /api/teams fetches teams with members
+      const response = await fetch('http://localhost:8080/teams/'); // Assuming GET /api/teams fetches teams with members
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
