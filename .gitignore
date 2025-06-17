@@ -23,5 +23,8 @@
 hs_err_pid*
 replay_pid*
 
+# Go backend app binary
+backend/coaching_app
+
 # MySQL data directory
 db/mysql_data/
