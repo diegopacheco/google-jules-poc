@@ -16,6 +16,27 @@ A Simple Team Coaching App without sugar.
 Jules working <br/>
 <img src="results/jules-01.png" width="600" />
 
+Add Team Member <br/>
+<img src="results/add-member.png" width="600" />
+
+Create New Team  <br/>
+<img src="results/create-new-team.png" width="600" />
+
+Assign Member to Team  <br/>
+<img src="results/assign-to-team.png" width="600" />
+
+Give Feedback <br/>
+<img src="results/give-feedback.png" width="600" />
+
+View Feedback <br/>
+<img src="results/vierw-feedbacks.png" width="600" />
+
+## Stack
+
+* Frontend: React, TypeScript, Bun and Vite
+* Backend: Go, Gin, Gorm, MySQL
+* Database: MySQL running in a Docker container
+
 ## Developmement
 
 This POC was developed using google Jules(https://jules.google/), AI Engineering agent that can help you to develop software.
