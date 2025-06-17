@@ -8,6 +8,7 @@ import (
 
 	"coaching-app/models"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -241,6 +242,39 @@ func AssignMemberToTeam(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Member assigned to team successfully"})
 }
 
+// RemoveMemberFromTeam removes a member from a team
+func RemoveMemberFromTeam(c *gin.Context) {
+	teamID := c.Param("team_id")
+	memberID := c.Param("member_id")
+
+	var team models.Team
+	if err := MainDB.First(&team, teamID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Team not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error finding team: " + err.Error()})
+		}
+		return
+	}
+
+	var member models.TeamMember
+	if err := MainDB.First(&member, memberID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Team member not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error finding member: " + err.Error()})
+		}
+		return
+	}
+
+	if err := MainDB.Model(&team).Association("Members").Delete(&member); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove member from team: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Member removed from team successfully"})
+}
+
 // GiveFeedback creates a new feedback entry
 func GiveFeedback(c *gin.Context) {
 	var feedback models.Feedback
@@ -284,6 +318,50 @@ func GiveFeedback(c *gin.Context) {
 	c.JSON(http.StatusCreated, feedback)
 }
 
+// GetFeedbacks retrieves feedbacks, optionally filtered by member_id or team_id
+func GetFeedbacks(c *gin.Context) {
+	var feedbacks []models.Feedback
+	query := MainDB
+
+	memberID := c.Query("member_id")
+	teamID := c.Query("team_id")
+
+	if memberID != "" {
+		query = query.Where("target_type = ? AND target_id = ?", "member", memberID)
+	} else if teamID != "" {
+		query = query.Where("target_type = ? AND target_id = ?", "team", teamID)
+	}
+	// Add more complex preloading if you want to include Giver details or Target details by default.
+	// For example, to include member/team names, you might need a more complex query or post-processing.
+	// For now, we return the raw feedback objects. The frontend can make separate calls if needed for names.
+
+	if err := query.Find(&feedbacks).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve feedbacks: " + err.Error()})
+		return
+	}
+
+	// To enhance the response, you might want to fetch target names.
+	// This is a simplified example. In a real app, this could get complex and might be better handled
+	// by joining tables or making additional targeted queries.
+	// For example (pseudo-code, needs actual implementation):
+	// for i, fb := range feedbacks {
+	// 	if fb.TargetType == "member" {
+	// 		var member models.TeamMember
+	// 		if MainDB.First(&member, fb.TargetID).Error == nil {
+	// 			feedbacks[i].TargetName = member.Name // Assuming Feedback struct has a TargetName field (non-DB)
+	// 		}
+	// 	} else if fb.TargetType == "team" {
+	// 		var team models.Team
+	// 		if MainDB.First(&team, fb.TargetID).Error == nil {
+	// 			feedbacks[i].TargetName = team.Name // Assuming Feedback struct has a TargetName field (non-DB)
+	// 		}
+	// 	}
+	// }
+
+
+	c.JSON(http.StatusOK, feedbacks)
+}
+
 func main() {
 	dsn := os.Getenv("DB_DSN")
 	if dsn == "" {
@@ -295,6 +373,10 @@ func main() {
 	}
 
 	r := gin.Default()
+
+	// Add CORS middleware
+	r.Use(cors.Default())
+
 	RegisterRoutes(r)
 
 	log.Println("Backend server starting on port 8080...")
@@ -321,11 +403,13 @@ func RegisterRoutes(router *gin.Engine) {
 		teamRoutes.PUT("/:id", UpdateTeam)
 		teamRoutes.DELETE("/:id", DeleteTeam)
 		teamRoutes.POST("/:team_id/members/:member_id", AssignMemberToTeam)
+		teamRoutes.DELETE("/:team_id/members/:member_id", RemoveMemberFromTeam) // Added DELETE route for removing member
 	}
 
 	// Feedback routes
 	feedbackRoutes := router.Group("/feedback")
 	{
 		feedbackRoutes.POST("/", GiveFeedback)
+		feedbackRoutes.GET("/", GetFeedbacks) // Added GET /feedbacks route
 	}
 }
