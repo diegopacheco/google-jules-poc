@@ -25,6 +25,7 @@ replay_pid*
 
 # Go backend app binary
 backend/coaching_app
+app_backend
 
 # MySQL data directory
 db/mysql_data/
