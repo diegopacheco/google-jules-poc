@@ -34,8 +34,6 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    volumes:
-      - ./backend:/app # Optional: Mount for live-reloading during development
 
   frontend:
     build:
@@ -44,7 +42,7 @@ services:
     container_name: frontend_app
     restart: unless-stopped
     ports:
-      - "3000:3000" # Assuming the frontend might run a dev server on 3000
+      - "3000:3000" 
     volumes:
       - ./frontend:/usr/src/app # Optional: Mount for live-reloading
       # Ensure node_modules is not overwritten by the mount

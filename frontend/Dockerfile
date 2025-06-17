@@ -19,4 +19,4 @@ EXPOSE 3000
 # Command to run the index.ts file using bun.
 # This will keep the container running and execute the script.
 # For a real app, this would be `bun run dev` or `bun start`
-CMD ["bun", "run", "index.ts"]
+CMD ["bunx", "vite", "--host", "0.0.0.0", "--port", "3000"]

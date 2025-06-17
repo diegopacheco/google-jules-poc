@@ -24,7 +24,7 @@ echo ""
 # Check if docker-compose.yml exists before trying to build
 if [ -f "docker-compose.yml" ]; then
   echo "Building Docker images via docker-compose..."
-  docker-compose build
+  docker-compose build --no-cache
   echo "Docker images build process complete."
 else
   echo "docker-compose.yml not found, skipping Docker build."
