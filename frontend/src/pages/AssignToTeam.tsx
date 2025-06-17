@@ -27,14 +27,14 @@ const AssignToTeam: React.FC = () => {
     const fetchMembersAndTeams = async () => {
       setError(null); // Clear previous errors
       try {
-        const membersResponse = await fetch('http://localhost:8080/members');
+        const membersResponse = await fetch('http://localhost:8080/members/');
         if (!membersResponse.ok) {
           throw new Error(`Failed to fetch members: ${membersResponse.statusText}`);
         }
         const membersData: Member[] = await membersResponse.json();
         setMembers(membersData);
 
-        const teamsResponse = await fetch('http://localhost:8080/teams');
+        const teamsResponse = await fetch('http://localhost:8080/teams/');
         if (!teamsResponse.ok) {
           throw new Error(`Failed to fetch teams: ${teamsResponse.statusText}`);
         }

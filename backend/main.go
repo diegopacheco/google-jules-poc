@@ -127,10 +127,17 @@ func CreateTeam(c *gin.Context) {
 		return
 	}
 
-	if err := MainDB.Create(&team).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	// Validate required fields
+	if team.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Team name is required"})
 		return
 	}
+
+	if err := MainDB.Create(&team).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create team: " + err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusCreated, team)
 }
 

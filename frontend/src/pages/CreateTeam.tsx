@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 
 const CreateTeam: React.FC = () => {
   const [teamName, setTeamName] = useState('');
-  const [teamLogo, setTeamLogo] = useState<File | null>(null);
+  const [logoUrl, setLogoUrl] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -13,35 +13,39 @@ const CreateTeam: React.FC = () => {
     setMessage(null);
     setError(null);
 
-    const formData = new FormData();
-    formData.append('name', teamName);
-    if (teamLogo) {
-      formData.append('logo_url', teamLogo.name); // Sending file name as logo_url for now
-      // If your backend handles file uploads:
-      // formData.append('logoFile', teamLogo);
-    }
+    const teamData = {
+      name: teamName,
+      logo_url: logoUrl
+    };
 
     try {
-      const response = await fetch('http://localhost:8080/teams', { // Assuming '/api' prefix
+      const response = await fetch('http://localhost:8080/teams/', {  // Added trailing slash
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(teamData),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        let errorMessage;
+        
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || `HTTP error! status: ${response.status}`;
+        } catch {
+          errorMessage = `HTTP error! status: ${response.status} - ${errorText}`;
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const result = await response.json();
       console.log('Success:', result);
       toast.success('Team created successfully!', { autoClose: 3000 });
-      // setMessage('Team created successfully!'); // Optionally remove
       setTeamName('');
-      setTeamLogo(null);
-      const fileInput = document.getElementById('team-logo-input') as HTMLInputElement;
-      if (fileInput) {
-          fileInput.value = '';
-      }
+      setLogoUrl('');
     } catch (err: any) {
       console.error('Error submitting form:', err);
       setError(err.message || 'Failed to create team.');
@@ -61,11 +65,11 @@ const CreateTeam: React.FC = () => {
           required
         />
         <Input
-          label="Team Logo"
-          id="team-logo-input"
-          type="file"
-          accept="image/*"
-          onChange={(e) => setTeamLogo(e.target.files ? e.target.files[0] : null)}
+          label="Team Logo URL"
+          type="url"
+          value={logoUrl}
+          onChange={(e) => setLogoUrl(e.target.value)}
+          placeholder="https://example.com/logo.png"
         />
         <Button type="submit">Create Team</Button>
       </form>
