@@ -31,6 +31,9 @@ Give Feedback <br/>
 View Feedback <br/>
 <img src="results/vierw-feedbacks.png" width="600" />
 
+Team Management <br/>
+<img src="results/team-mgmt.png" width="600" />
+
 ## Stack
 
 * Frontend: React, TypeScript, Bun and Vite
