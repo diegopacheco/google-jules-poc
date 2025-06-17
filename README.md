@@ -1,6 +1,16 @@
-# google-jules-poc
+# NoSugar Coaching
 
-This project is a proof-of-concept application using Google Jules. It includes a frontend, a backend, and a MySQL database, all containerized using Docker.
+google-jules-poc: POC using Google Jules
+A Simple Team Coaching App without sugar.
+
+# Features
+
+* Create and manage team members
+* Assign members to teams
+* Provide feedback on team performance
+* Provide feedback on people performance
+
+# Results
 
 ## Prerequisites
 
@@ -83,3 +93,4 @@ This project is a proof-of-concept application using Google Jules. It includes a
     1. Stop the services: `docker-compose down`
     2. Delete the data directory: `sudo rm -rf ./db/mysql_data/` (use `sudo` if Docker created it as root)
     3. Restart: `./start.sh`. The `schema.sql` will be re-applied.
+
