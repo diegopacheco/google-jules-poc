@@ -21,6 +21,7 @@
     "react-toastify": "^11.0.5"
   },
   "scripts": {
-    "dev": "bunx vite"
+    "dev": "bunx vite",
+    "build": "vite build"
   }
 }
