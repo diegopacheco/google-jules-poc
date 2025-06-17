@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"os" // Import the "os" package
 
 	"coaching-app/models"
 
@@ -283,9 +284,11 @@ func GiveFeedback(c *gin.Context) {
 }
 
 func main() {
-	// DSN (Data Source Name) - placeholder, should be configured externally
-	// Example: "user:password@tcp(127.0.0.1:3306)/coaching_app?charset=utf8mb4&parseTime=True&loc=Local"
-	dsn := "user:password@tcp(127.0.0.1:3306)/coaching_app?charset=utf8mb4&parseTime=True&loc=Local" // TODO: Configure DSN via environment variables or config file
+	dsn := os.Getenv("DB_DSN")
+	if dsn == "" {
+		log.Fatalf("DB_DSN environment variable not set")
+	}
+
 	if err := InitDatabase(dsn); err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
@@ -293,6 +296,7 @@ func main() {
 	r := gin.Default()
 	RegisterRoutes(r)
 
+	log.Println("Backend server starting on port 8080...")
 	r.Run(":8080") // Listen and serve on 0.0.0.0:8080
 }
 

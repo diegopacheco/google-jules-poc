@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0 # Using MySQL 8.0 as 9.0 is not standard, 8.0 is widely used and stable.
+    container_name: mysql_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword # Replace with a strong password in a real scenario
+      MYSQL_DATABASE: coaching_app
+      MYSQL_USER: user # For the backend application
+      MYSQL_PASSWORD: password # For the backend application
+    volumes:
+      - ./db/mysql_data:/var/lib/mysql
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend_app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      DB_DSN: "user:password@tcp(mysql_db:3306)/coaching_app?charset=utf8mb4&parseTime=True&loc=Local"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app # Optional: Mount for live-reloading during development
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend_app
+    restart: unless-stopped
+    ports:
+      - "3000:3000" # Assuming the frontend might run a dev server on 3000
+    volumes:
+      - ./frontend:/usr/src/app # Optional: Mount for live-reloading
+      # Ensure node_modules is not overwritten by the mount
+      - /usr/src/app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data: # Define the named volume (though we are using a host bind mount)
