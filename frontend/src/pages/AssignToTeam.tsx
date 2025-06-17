@@ -27,14 +27,14 @@ const AssignToTeam: React.FC = () => {
     const fetchMembersAndTeams = async () => {
       setError(null); // Clear previous errors
       try {
-        const membersResponse = await fetch('/api/members');
+        const membersResponse = await fetch('http://localhost:8080/members');
         if (!membersResponse.ok) {
           throw new Error(`Failed to fetch members: ${membersResponse.statusText}`);
         }
         const membersData: Member[] = await membersResponse.json();
         setMembers(membersData);
 
-        const teamsResponse = await fetch('/api/teams');
+        const teamsResponse = await fetch('http://localhost:8080/teams');
         if (!teamsResponse.ok) {
           throw new Error(`Failed to fetch teams: ${teamsResponse.statusText}`);
         }
@@ -64,7 +64,7 @@ const AssignToTeam: React.FC = () => {
 
     try {
       // The endpoint expects no body for this POST request, just IDs in the URL
-      const response = await fetch(`/api/teams/${selectedTeamId}/members/${selectedMemberId}`, {
+      const response = await fetch(`http://localhost:8080/teams/${selectedTeamId}/members/${selectedMemberId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json', // Still good practice to set, even if no body

@@ -25,7 +25,7 @@ const ListFeedbacks: React.FC = () => {
     const fetchFeedbacks = async () => {
       setLoading(true);
       setError(null);
-      let url = '/api/feedbacks'; // Base URL
+      let url = 'http://localhost:8080/feedbacks'; // Base URL
       const params = new URLSearchParams();
       if (filterType !== 'all' && filterId) {
         if (filterType === 'member') {
