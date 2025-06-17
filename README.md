@@ -1,6 +1,5 @@
 # NoSugar Coaching
 
-google-jules-poc: POC using Google Jules
 A Simple Team Coaching App without sugar.
 
 <img src="logo-app.png" width="200" />
@@ -13,6 +12,26 @@ A Simple Team Coaching App without sugar.
 * Provide feedback on people performance
 
 # Results
+
+Jules working <br/>
+<img src="results/jules-01.png" width="600" />
+
+## Developmement
+
+PROS
+
+* Right now (16.JUN.2025) Jules is FREE.
+* Jules asks questions to understand the requirements and the prompts
+* Jules generate plans and ask you to approve them before moving forward
+
+CONS
+
+* Jules does not open PRs (you need open in github)
+* Jules does not fully respect agents.md (because I asked for no comments)
+* Jules is a bit slow compared with OpenAI Codex
+* Right now (16.JUN.2025) there is a limit of 60 tasks a day.
+
+You can see all PRs here: https://github.com/diegopacheco/google-jules-poc/pulls?q=is%3Apr+is%3Aclosed
 
 ## Prerequisites
 
@@ -95,4 +114,8 @@ A Simple Team Coaching App without sugar.
     1. Stop the services: `docker-compose down`
     2. Delete the data directory: `sudo rm -rf ./db/mysql_data/` (use `sudo` if Docker created it as root)
     3. Restart: `./start.sh`. The `schema.sql` will be re-applied.
+
+### Related POC
+
+* OpenAI Codex: https://github.com/diegopacheco/codex-poc
 
