@@ -2,17 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { Button, Card } from '../components';
 import { toast } from 'react-toastify';
 
+// Updated interfaces to match the actual Go struct field names
 interface Member {
-  id: number;
-  name: string;
-  email: string;
-  picture_url?: string;
+  ID: number;        // Changed from id to ID
+  Name: string;      // Changed from name to Name
+  Email: string;     // Email stays the same
+  PictureURL?: string; // Changed from picture_url to PictureURL
 }
 
 interface Team {
-  id: number;
-  name: string;
-  logo_url?: string;
+  ID: number;        // Changed from id to ID
+  Name: string;      // Changed from name to Name
+  LogoURL?: string;  // Changed from logo_url to LogoURL
+  Members?: Member[]; // Added Members array that Go returns
 }
 
 const AssignToTeam: React.FC = () => {
@@ -136,11 +138,11 @@ const AssignToTeam: React.FC = () => {
           >
             <option value="">--Select a member--</option>
             {members.map((member, index) => {
-              // Add debugging info
-              console.log(`Member ${index}:`, member, 'ID:', member.id, 'Type:', typeof member.id);
+              // Updated to use uppercase field names
+              console.log(`Member ${index}:`, member, 'ID:', member.ID, 'Type:', typeof member.ID);
               return (
-                <option key={`member-${member.id || index}`} value={member.id}>
-                  {member.name} ({member.email})
+                <option key={`member-${member.ID || index}`} value={member.ID}>
+                  {member.Name} ({member.Email})
                 </option>
               );
             })}
@@ -163,11 +165,11 @@ const AssignToTeam: React.FC = () => {
           >
             <option value="">--Select a team--</option>
             {teams.map((team, index) => {
-              // Add debugging info
-              console.log(`Team ${index}:`, team, 'ID:', team.id, 'Type:', typeof team.id);
+              // Updated to use uppercase field names
+              console.log(`Team ${index}:`, team, 'ID:', team.ID, 'Type:', typeof team.ID);
               return (
-                <option key={`team-${team.id || index}`} value={team.id}>
-                  {team.name}
+                <option key={`team-${team.ID || index}`} value={team.ID}>
+                  {team.Name}
                 </option>
               );
             })}
