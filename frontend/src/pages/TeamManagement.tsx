@@ -30,7 +30,7 @@ const TeamManagement: React.FC = () => {
     setActionError(null);
     setActionMessage(null);
     try {
-      const response = await fetch('/api/teams'); // Assuming GET /api/teams fetches teams with members
+      const response = await fetch('http://localhost:8080/teams'); // Assuming GET /api/teams fetches teams with members
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
@@ -66,7 +66,7 @@ const TeamManagement: React.FC = () => {
     if (!window.confirm('Are you sure you want to remove this member from the team?')) return;
 
     try {
-      const response = await fetch(`/api/teams/${teamId}/members/${memberId}`, {
+      const response = await fetch(`http://localhost:8080/teams/${teamId}/members/${memberId}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
@@ -87,7 +87,7 @@ const TeamManagement: React.FC = () => {
     if (!window.confirm('Are you sure you want to delete this team? This action cannot be undone.')) return;
 
     try {
-      const response = await fetch(`/api/teams/${teamId}`, {
+      const response = await fetch(`http://localhost:8080/teams/${teamId}`, {
         method: 'DELETE',
       });
       if (!response.ok) {

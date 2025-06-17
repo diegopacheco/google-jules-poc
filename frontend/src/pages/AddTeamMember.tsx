@@ -26,7 +26,7 @@ const AddTeamMember: React.FC = () => {
     }
 
     try {
-      const response = await fetch('/api/members', { // Assuming '/api' prefix for backend
+      const response = await fetch('http://localhost:8080/members', { // Assuming '/api' prefix for backend
         method: 'POST',
         body: formData, // FormData will set the Content-Type to multipart/form-data
       });
