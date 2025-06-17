@@ -3,6 +3,8 @@
 google-jules-poc: POC using Google Jules
 A Simple Team Coaching App without sugar.
 
+<img src="logo-app.png" width="200" />
+
 # Features
 
 * Create and manage team members
