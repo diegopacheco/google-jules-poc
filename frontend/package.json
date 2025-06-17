@@ -18,6 +18,6 @@
     "react-router-dom": "^7.6.2"
   },
   "scripts": {
-    "dev": "bun --hot index.html"
+    "dev": "bun run --hot src/index.tsx"
   }
 }
