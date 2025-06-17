@@ -23,10 +23,10 @@ func InitDatabase(dsn string) error {
 		return err
 	}
 
-	err = MainDB.AutoMigrate(&models.TeamMember{}, &models.Team{}, &models.Feedback{})
-	if err != nil {
-		return err
-	}
+	//err = MainDB.AutoMigrate(&models.TeamMember{}, &models.Team{}, &models.Feedback{})
+	//if err != nil {
+	//return err
+	//}
 	return nil
 }
 
@@ -201,7 +201,6 @@ func DeleteTeam(c *gin.Context) {
 		return
 	}
 
-
 	if err := MainDB.Delete(&models.Team{}, id).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -211,7 +210,7 @@ func DeleteTeam(c *gin.Context) {
 
 // AssignMemberToTeam assigns a member to a team
 func AssignMemberToTeam(c *gin.Context) {
-	teamID := c.Param("team_id")
+	teamID := c.Param("id") // Changed from "team_id" to "id"
 	memberID := c.Param("member_id")
 
 	var team models.Team
@@ -244,7 +243,7 @@ func AssignMemberToTeam(c *gin.Context) {
 
 // RemoveMemberFromTeam removes a member from a team
 func RemoveMemberFromTeam(c *gin.Context) {
-	teamID := c.Param("team_id")
+	teamID := c.Param("id") // Changed from "team_id" to "id"
 	memberID := c.Param("member_id")
 
 	var team models.Team
@@ -358,7 +357,6 @@ func GetFeedbacks(c *gin.Context) {
 	// 	}
 	// }
 
-
 	c.JSON(http.StatusOK, feedbacks)
 }
 
@@ -374,8 +372,14 @@ func main() {
 
 	r := gin.Default()
 
-	// Add CORS middleware
-	r.Use(cors.Default())
+	// Configure CORS to allow frontend requests
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://localhost:3000", "http://127.0.0.1:3000"}
+	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With"}
+	config.ExposeHeaders = []string{"Content-Length"}
+	config.AllowCredentials = true
+	r.Use(cors.New(config))
 
 	RegisterRoutes(r)
 
@@ -402,14 +406,17 @@ func RegisterRoutes(router *gin.Engine) {
 		teamRoutes.GET("/:id", GetTeam)
 		teamRoutes.PUT("/:id", UpdateTeam)
 		teamRoutes.DELETE("/:id", DeleteTeam)
-		teamRoutes.POST("/:team_id/members/:member_id", AssignMemberToTeam)
-		teamRoutes.DELETE("/:team_id/members/:member_id", RemoveMemberFromTeam) // Added DELETE route for removing member
+
+		// Move team-member assignment routes to avoid conflict
+		// Use a different path structure
+		teamRoutes.POST("/:id/assign/:member_id", AssignMemberToTeam)
+		teamRoutes.DELETE("/:id/remove/:member_id", RemoveMemberFromTeam)
 	}
 
 	// Feedback routes
 	feedbackRoutes := router.Group("/feedback")
 	{
 		feedbackRoutes.POST("/", GiveFeedback)
-		feedbackRoutes.GET("/", GetFeedbacks) // Added GET /feedbacks route
+		feedbackRoutes.GET("/", GetFeedbacks)
 	}
 }
