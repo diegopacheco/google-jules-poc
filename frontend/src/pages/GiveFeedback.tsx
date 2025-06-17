@@ -23,9 +23,9 @@ const GiveFeedback: React.FC = () => {
       try {
         let response;
         if (feedbackType === 'member') {
-          response = await fetch('/api/members');
+          response = await fetch('http://localhost:8080/members');
         } else { // feedbackType === 'team'
-          response = await fetch('/api/teams');
+          response = await fetch('http://localhost:8080/teams');
         }
 
         if (!response.ok) {
@@ -61,7 +61,7 @@ const GiveFeedback: React.FC = () => {
     };
 
     try {
-      const response = await fetch('/api/feedback', { // Assuming '/api' prefix
+      const response = await fetch('http://localhost:8080/feedback', { // Assuming '/api' prefix
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -22,7 +22,7 @@ const CreateTeam: React.FC = () => {
     }
 
     try {
-      const response = await fetch('/api/teams', { // Assuming '/api' prefix
+      const response = await fetch('http://localhost:8080/teams', { // Assuming '/api' prefix
         method: 'POST',
         body: formData,
       });
