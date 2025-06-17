@@ -12,16 +12,16 @@ import (
 	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
+var MainDB *gorm.DB // Renamed DB to MainDB
 
 func InitDatabase(dsn string) error {
 	var err error
-	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	MainDB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return err
 	}
 
-	err = DB.AutoMigrate(&models.TeamMember{}, &models.Team{}, &models.Feedback{})
+	err = MainDB.AutoMigrate(&models.TeamMember{}, &models.Team{}, &models.Feedback{})
 	if err != nil {
 		return err
 	}
@@ -36,7 +36,7 @@ func CreateTeamMember(c *gin.Context) {
 		return
 	}
 
-	if err := DB.Create(&member).Error; err != nil {
+	if err := MainDB.Create(&member).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -45,7 +45,7 @@ func CreateTeamMember(c *gin.Context) {
 
 func GetTeamMembers(c *gin.Context) {
 	var members []models.TeamMember
-	if err := DB.Find(&members).Error; err != nil {
+	if err := MainDB.Find(&members).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -55,7 +55,8 @@ func GetTeamMembers(c *gin.Context) {
 func GetTeamMember(c *gin.Context) {
 	id := c.Param("id")
 	var member models.TeamMember
-	if err := DB.First(&member, id).Error; err != nil {
+	// Create a new GORM session for this operation
+	if err := MainDB.Session(&gorm.Session{NewDB: true}).First(&member, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Team member not found"})
 		} else {
@@ -69,7 +70,7 @@ func GetTeamMember(c *gin.Context) {
 func UpdateTeamMember(c *gin.Context) {
 	id := c.Param("id")
 	var member models.TeamMember
-	if err := DB.First(&member, id).Error; err != nil {
+	if err := MainDB.First(&member, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Team member not found"})
 		} else {
@@ -88,7 +89,7 @@ func UpdateTeamMember(c *gin.Context) {
 	// So, we ensure the ID from path is set on the struct to be updated
 	updatedMember.ID = member.ID
 
-	if err := DB.Model(&member).Updates(updatedMember).Error; err != nil {
+	if err := MainDB.Model(&member).Updates(updatedMember).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -99,7 +100,7 @@ func DeleteTeamMember(c *gin.Context) {
 	id := c.Param("id")
 	var member models.TeamMember
 	// Check if record exists before deleting
-	if err := DB.First(&member, id).Error; err != nil {
+	if err := MainDB.First(&member, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Team member not found"})
 		} else {
@@ -108,7 +109,7 @@ func DeleteTeamMember(c *gin.Context) {
 		return
 	}
 
-	if err := DB.Delete(&models.TeamMember{}, id).Error; err != nil {
+	if err := MainDB.Delete(&models.TeamMember{}, id).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -123,7 +124,7 @@ func CreateTeam(c *gin.Context) {
 		return
 	}
 
-	if err := DB.Create(&team).Error; err != nil {
+	if err := MainDB.Create(&team).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -132,7 +133,7 @@ func CreateTeam(c *gin.Context) {
 
 func GetTeams(c *gin.Context) {
 	var teams []models.Team
-	if err := DB.Preload("Members").Find(&teams).Error; err != nil {
+	if err := MainDB.Preload("Members").Find(&teams).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -142,7 +143,7 @@ func GetTeams(c *gin.Context) {
 func GetTeam(c *gin.Context) {
 	id := c.Param("id")
 	var team models.Team
-	if err := DB.Preload("Members").First(&team, id).Error; err != nil {
+	if err := MainDB.Preload("Members").First(&team, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Team not found"})
 		} else {
@@ -156,7 +157,7 @@ func GetTeam(c *gin.Context) {
 func UpdateTeam(c *gin.Context) {
 	id := c.Param("id")
 	var team models.Team
-	if err := DB.First(&team, id).Error; err != nil {
+	if err := MainDB.First(&team, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Team not found"})
 		} else {
@@ -172,7 +173,7 @@ func UpdateTeam(c *gin.Context) {
 	}
 	updatedTeam.ID = team.ID // Ensure ID is not changed
 
-	if err := DB.Model(&team).Updates(updatedTeam).Error; err != nil {
+	if err := MainDB.Model(&team).Updates(updatedTeam).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -183,7 +184,7 @@ func DeleteTeam(c *gin.Context) {
 	id := c.Param("id")
 	var team models.Team
 	// Check if record exists
-	if err := DB.First(&team, id).Error; err != nil {
+	if err := MainDB.First(&team, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Team not found"})
 		} else {
@@ -193,13 +194,13 @@ func DeleteTeam(c *gin.Context) {
 	}
 
 	// GORM will handle many2many associations by default (removing entries from join table)
-	if err := DB.Select("Members").Delete(&team).Error; err != nil {
+	if err := MainDB.Select("Members").Delete(&team).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to clear team members association: " + err.Error()})
 		return
 	}
 
 
-	if err := DB.Delete(&models.Team{}, id).Error; err != nil {
+	if err := MainDB.Delete(&models.Team{}, id).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -212,7 +213,7 @@ func AssignMemberToTeam(c *gin.Context) {
 	memberID := c.Param("member_id")
 
 	var team models.Team
-	if err := DB.First(&team, teamID).Error; err != nil {
+	if err := MainDB.First(&team, teamID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Team not found"})
 		} else {
@@ -222,7 +223,7 @@ func AssignMemberToTeam(c *gin.Context) {
 	}
 
 	var member models.TeamMember
-	if err := DB.First(&member, memberID).Error; err != nil {
+	if err := MainDB.First(&member, memberID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Team member not found"})
 		} else {
@@ -231,7 +232,7 @@ func AssignMemberToTeam(c *gin.Context) {
 		return
 	}
 
-	if err := DB.Model(&team).Association("Members").Append(&member); err != nil {
+	if err := MainDB.Model(&team).Association("Members").Append(&member); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assign member to team: " + err.Error()})
 		return
 	}
@@ -255,7 +256,7 @@ func GiveFeedback(c *gin.Context) {
 
 	if feedback.TargetType == "team" {
 		var team models.Team
-		if err := DB.First(&team, feedback.TargetID).Error; err != nil {
+		if err := MainDB.First(&team, feedback.TargetID).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				c.JSON(http.StatusNotFound, gin.H{"error": "Target team not found"})
 			} else {
@@ -265,7 +266,7 @@ func GiveFeedback(c *gin.Context) {
 		}
 	} else if feedback.TargetType == "member" {
 		var member models.TeamMember
-		if err := DB.First(&member, feedback.TargetID).Error; err != nil {
+		if err := MainDB.First(&member, feedback.TargetID).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				c.JSON(http.StatusNotFound, gin.H{"error": "Target member not found"})
 			} else {
@@ -275,7 +276,7 @@ func GiveFeedback(c *gin.Context) {
 		}
 	}
 
-	if err := DB.Create(&feedback).Error; err != nil {
+	if err := MainDB.Create(&feedback).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create feedback: " + err.Error()})
 		return
 	}
