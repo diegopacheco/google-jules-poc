@@ -34,6 +34,7 @@ CONS
 * Jules got stuck more often compared with OpenAI Codex
 * When I create a task to Jules fix a bug IDK why links to this google website: https://b.corp.google.com/issues/04
 * Right now (16.JUN.2025) there is a limit of 60 tasks a day.
+* 2h and 30min and could not do this task: `Task 3: Create tests for the frontend. Ensure they all pass before submitting the PR.` agent was stuck with bun and tests in his env.
 
 You can see all PRs here: https://github.com/diegopacheco/google-jules-poc/pulls?q=is%3Apr+is%3Aclosed
 

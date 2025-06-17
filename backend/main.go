@@ -4,7 +4,8 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"os" // Import the "os" package
+	"os"
+	"time"
 
 	"coaching-app/models"
 
@@ -30,7 +31,6 @@ func InitDatabase(dsn string) error {
 	return nil
 }
 
-// TeamMember CRUD operations
 func CreateTeamMember(c *gin.Context) {
 	var member models.TeamMember
 	if err := c.ShouldBindJSON(&member); err != nil {
@@ -39,9 +39,10 @@ func CreateTeamMember(c *gin.Context) {
 	}
 
 	if err := MainDB.Create(&member).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create team member: " + err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusCreated, member)
 }
 
@@ -372,19 +373,23 @@ func main() {
 
 	r := gin.Default()
 
-	// Configure CORS to allow frontend requests
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:3000", "http://127.0.0.1:3000"}
-	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
-	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With"}
-	config.ExposeHeaders = []string{"Content-Length"}
-	config.AllowCredentials = true
-	r.Use(cors.New(config))
+	// Disable trailing slash redirect
+	r.RedirectTrailingSlash = false
+
+	// More permissive CORS configuration for development
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"*"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: false,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	RegisterRoutes(r)
 
 	log.Println("Backend server starting on port 8080...")
-	r.Run(":8080") // Listen and serve on 0.0.0.0:8080
+	r.Run(":8080")
 }
 
 func RegisterRoutes(router *gin.Engine) {
