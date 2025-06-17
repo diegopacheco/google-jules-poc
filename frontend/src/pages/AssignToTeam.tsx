@@ -1,56 +1,69 @@
-import React, { useState, useEffect } from 'react'; // Added useEffect
+import React, { useState, useEffect } from 'react';
 import { Button, Card } from '../components';
 import { toast } from 'react-toastify';
 
-// Updated interfaces to expect numeric IDs, common in backend responses
 interface Member {
   id: number;
   name: string;
-  // Add other fields like email if needed for display, though not strictly for assignment
+  email: string;
+  picture_url?: string;
 }
 
 interface Team {
   id: number;
   name: string;
-  // Add other fields like logo_url if needed
+  logo_url?: string;
 }
 
 const AssignToTeam: React.FC = () => {
-  const [selectedMemberId, setSelectedMemberId] = useState<string>(''); // Keep as string for select value
-  const [selectedTeamId, setSelectedTeamId] = useState<string>('');   // Keep as string for select value
+  const [selectedMemberId, setSelectedMemberId] = useState<string>('');
+  const [selectedTeamId, setSelectedTeamId] = useState<string>('');
   const [members, setMembers] = useState<Member[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [message, setMessage] = useState<string | null>(null); // For general messages, if needed
-  const [error, setError] = useState<string | null>(null); // For displaying fetch or submission errors
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchMembersAndTeams = async () => {
-      setError(null); // Clear previous errors
+      setError(null);
+      setLoading(true);
+      
       try {
+        console.log('Fetching members and teams...');
+        
         const membersResponse = await fetch('http://localhost:8080/members/');
+        console.log('Members response:', membersResponse);
+        
         if (!membersResponse.ok) {
-          throw new Error(`Failed to fetch members: ${membersResponse.statusText}`);
+          throw new Error(`Failed to fetch members: ${membersResponse.status} ${membersResponse.statusText}`);
         }
         const membersData: Member[] = await membersResponse.json();
+        console.log('Members data detailed:', JSON.stringify(membersData, null, 2));
         setMembers(membersData);
 
         const teamsResponse = await fetch('http://localhost:8080/teams/');
+        console.log('Teams response:', teamsResponse);
+        
         if (!teamsResponse.ok) {
-          throw new Error(`Failed to fetch teams: ${teamsResponse.statusText}`);
+          throw new Error(`Failed to fetch teams: ${teamsResponse.status} ${teamsResponse.statusText}`);
         }
         const teamsData: Team[] = await teamsResponse.json();
+        console.log('Teams data detailed:', JSON.stringify(teamsData, null, 2));
         setTeams(teamsData);
 
       } catch (err: any) {
+        console.error('Error fetching data:', err);
         setError(err.message || 'An unknown error occurred while fetching data.');
-        setMembers([]); // Clear data on error
-        setTeams([]);   // Clear data on error
+        setMembers([]);
+        setTeams([]);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchMembersAndTeams();
   }, []);
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,25 +76,31 @@ const AssignToTeam: React.FC = () => {
     }
 
     try {
-      // The endpoint expects no body for this POST request, just IDs in the URL
-      const response = await fetch(`http://localhost:8080/teams/${selectedTeamId}/members/${selectedMemberId}`, {
+      // Using the correct endpoint format from your backend: /teams/:id/assign/:member_id
+      const response = await fetch(`http://localhost:8080/teams/${selectedTeamId}/assign/${selectedMemberId}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json', // Still good practice to set, even if no body
+          'Content-Type': 'application/json',
         },
-        // No body for this specific assignment request as per typical REST patterns for associations
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        let errorMessage;
+        
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || `HTTP error! status: ${response.status}`;
+        } catch {
+          errorMessage = `HTTP error! status: ${response.status} - ${errorText}`;
+        }
+        
+        throw new Error(errorMessage);
       }
 
-      // Assuming the backend returns a success message or the updated team/member relation
-      const result = await response.json(); // Or response.text() if it's just a message
+      const result = await response.json();
       console.log('Success:', result);
       toast.success(result.message || 'Member assigned to team successfully!', { autoClose: 3000 });
-      // setMessage(result.message || 'Member assigned to team successfully!'); // Optionally remove
       setSelectedMemberId('');
       setSelectedTeamId('');
     } catch (err: any) {
@@ -90,13 +109,24 @@ const AssignToTeam: React.FC = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <Card title="Assign Member to Team">
+        <p>Loading members and teams...</p>
+      </Card>
+    );
+  }
+
   return (
     <Card title="Assign Member to Team">
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {message && <p style={{ color: 'green' }}>{message}</p>}
         {error && <p style={{ color: 'red' }}>{error}</p>}
+        
         <div>
-          <label htmlFor="member-select" style={{ display: 'block', marginBottom: '0.5rem' }}>Select Member:</label>
+          <label htmlFor="member-select" style={{ display: 'block', marginBottom: '0.5rem' }}>
+            Select Member:
+          </label>
           <select
             id="member-select"
             value={selectedMemberId}
@@ -104,13 +134,26 @@ const AssignToTeam: React.FC = () => {
             required
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
           >
-            <option value="" disabled>--Select a member--</option>
-            {members.map(member => <option key={member.id} value={member.id}>{member.name}</option>)}
+            <option value="">--Select a member--</option>
+            {members.map((member, index) => {
+              // Add debugging info
+              console.log(`Member ${index}:`, member, 'ID:', member.id, 'Type:', typeof member.id);
+              return (
+                <option key={`member-${member.id || index}`} value={member.id}>
+                  {member.name} ({member.email})
+                </option>
+              );
+            })}
           </select>
+          <small style={{ color: '#666' }}>
+            {members.length === 0 ? 'No members found. Please add some members first.' : `${members.length} members available`}
+          </small>
         </div>
 
         <div>
-          <label htmlFor="team-select" style={{ display: 'block', marginBottom: '0.5rem' }}>Select Team:</label>
+          <label htmlFor="team-select" style={{ display: 'block', marginBottom: '0.5rem' }}>
+            Select Team:
+          </label>
           <select
             id="team-select"
             value={selectedTeamId}
@@ -118,12 +161,25 @@ const AssignToTeam: React.FC = () => {
             required
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
           >
-            <option value="" disabled>--Select a team--</option>
-            {teams.map(team => <option key={team.id} value={team.id}>{team.name}</option>)}
+            <option value="">--Select a team--</option>
+            {teams.map((team, index) => {
+              // Add debugging info
+              console.log(`Team ${index}:`, team, 'ID:', team.id, 'Type:', typeof team.id);
+              return (
+                <option key={`team-${team.id || index}`} value={team.id}>
+                  {team.name}
+                </option>
+              );
+            })}
           </select>
+          <small style={{ color: '#666' }}>
+            {teams.length === 0 ? 'No teams found. Please create some teams first.' : `${teams.length} teams available`}
+          </small>
         </div>
 
-        <Button type="submit">Assign to Team</Button>
+        <Button type="submit" disabled={!selectedMemberId || !selectedTeamId}>
+          Assign to Team
+        </Button>
       </form>
     </Card>
   );
