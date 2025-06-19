@@ -149,7 +149,9 @@ You can see all PRs here: https://github.com/diegopacheco/google-jules-poc/pulls
     2. Delete the data directory: `sudo rm -rf ./db/mysql_data/` (use `sudo` if Docker created it as root)
     3. Restart: `./start.sh`. The `schema.sql` will be re-applied.
 
-### Related POC
+
+### Related POCs
 
 * OpenAI Codex: https://github.com/diegopacheco/codex-poc
-
+* Anthropic Claude Code https://github.com/diegopacheco/claude-code-poc
+* Cursor POC https://github.com/diegopacheco/docker-cleanup
