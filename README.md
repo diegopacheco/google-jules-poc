@@ -155,3 +155,4 @@ You can see all PRs here: https://github.com/diegopacheco/google-jules-poc/pulls
 * OpenAI Codex: https://github.com/diegopacheco/codex-poc
 * Anthropic Claude Code https://github.com/diegopacheco/claude-code-poc
 * Cursor POC https://github.com/diegopacheco/docker-cleanup
+* Gemini-cli POC: https://github.com/diegopacheco/gemini-cli-poc
