@@ -2,6 +2,8 @@
 
 A Simple Team Coaching App without sugar.
 
+Built with Google Jules: https://jules.google/
+
 <img src="logo-app.png" width="200" />
 
 # Features
