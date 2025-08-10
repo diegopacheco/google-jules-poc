@@ -161,3 +161,4 @@ You can see all PRs here: https://github.com/diegopacheco/google-jules-poc/pulls
 * Sketch POC: https://github.com/diegopacheco/sketch-dev-poc
 * Augument Code POC: https://github.com/diegopacheco/augmentcode-poc
 * Opencode POC: https://github.com/diegopacheco/opencode-poc
+* Cursor Agent POC: https://github.com/diegopacheco/cursor-agent-gpt5-poc
